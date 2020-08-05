@@ -12,11 +12,11 @@ export default function Header() {
 			</p>
 		</div>
 		<div className="mr-2 mb-2 ml-2">
-			<a href="https://github.com/shawn-mcginty" class="mr-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-600 hover:bg-white mt-4 lg:mt-0">
+			<a href="https://github.com/shawn-mcginty" className="mr-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-600 hover:bg-white mt-4 lg:mt-0">
 				<RiGithubLine className="mr-1 inline" />
 				GitHub
 			</a>
-			<a href="https://twitter.com/shawn_mcginty" class="mr-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-600 hover:bg-white mt-4 lg:mt-0">
+			<a href="https://twitter.com/shawn_mcginty" className="mr-2 inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-orange-600 hover:bg-white mt-4 lg:mt-0">
 				<RiTwitterLine className="mr-1 inline" />
 				Twitter
 			</a>

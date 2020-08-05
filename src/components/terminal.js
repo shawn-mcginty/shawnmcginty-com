@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 
-export default function Terminal({ text, inputText }) {
+import BashSymbol from './bashSymbol';
+
+export default function Terminal({ text, inputText, disabled }) {
 	const terminalContainerEl = useRef(null);
 
 	useEffect(() => {
@@ -10,12 +12,10 @@ export default function Terminal({ text, inputText }) {
 	return <div className="h-full max-h-full ml-1 font-mono min-h-0">
 		<div ref={terminalContainerEl} className="overflow-scroll max-h-full h-full min-h-0">
 			<div className="terminal">
-				<pre>
-					{ text.map(line => <>{`${line}\n`}</>) }
-				</pre>
+				{ text.map(line => <>{line}<br/></>) }
 			</div>
-			<div className="input">
-				<span>$</span>
+			<div className={`input${disabled ? ' hidden' : ''}`}>
+				<BashSymbol/>
 				<span>{inputText}</span>
 				<span className="blinking">&nbsp;</span>
 			</div>

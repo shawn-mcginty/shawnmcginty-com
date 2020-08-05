@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+
+import BashSymbol from './bashSymbol';
 
 const framesPerChar = 2;
-const enterDelay = 20;
+const enterDelay = 40;
 
-const typeAnimation = (pushText, setInputText, textToAnimate) => new Promise((resolve) => {
-	const animate = (pushLine, setInput, currentInputText, remainingInputText, framesToSkip) => {
+const typeAnimation = (setText, text, setInputText, newLines) => new Promise((resolve) => {
+	const animate = (setInput, currentInputText, remainingInputText, framesToSkip) => {
 		if (framesToSkip > 0) {
 			window
-				.requestAnimationFrame(() => animate(pushLine, setInput, currentInputText, remainingInputText, framesToSkip - 1));
+				.requestAnimationFrame(() => animate(setInput, currentInputText, remainingInputText, framesToSkip - 1));
 			return;
 		}
 
@@ -17,33 +19,36 @@ const typeAnimation = (pushText, setInputText, textToAnimate) => new Promise((re
 			setInput(newInputText);
 
 			if (restChars.length > 0) {
-				window.requestAnimationFrame(() => animate(pushLine, setInput, newInputText, restChars, framesPerChar));
+				window.requestAnimationFrame(() => animate(setInput, newInputText, restChars, framesPerChar));
 				return;
 			}
 
-			window.requestAnimationFrame(() => animate(pushLine, setInput, newInputText, restChars, enterDelay));
+			window.requestAnimationFrame(() => animate(setInput, newInputText, restChars, enterDelay));
 			return;
 		}
 
 		setInput('');
-		pushLine(currentInputText);
+		
+		const [ cmd, ...restOfLines ] = newLines;
+		const newSetOflines = [<><BashSymbol/>{cmd}</>, ...restOfLines];
+		setText([...text, ...newSetOflines]);
 		resolve();
 	};
 
-	animate(pushText, setInputText, '', textToAnimate, framesPerChar);
+	animate(setInputText, '', newLines[0].props.children, framesPerChar);
 });
 
-export default function Vim({ pushText, setInputText }) {
+export default function Vim({ setText, text, setInputText, isAnimating, setIsAnimating, disabled }) {
 	const [isAboutHover, setAboutHover] = useState(false);
 	const [isProjectsHover, setProjectsHover] = useState(false);
 	const [isThingsHover, setThingsHover] = useState(false);
 	const [isContactHover, setContactHover] = useState(false);
-	const linkClassName = 'inline-block hover:border hover:border-blue-700 py-2 px-4 hover:bg-blue-700 text-blue-700 hover:text-white';
+	const linkClassName = `inline-block py-2 px-4 text-blue-700${disabled ? ' cursor-not-allowed' : ' hover:border hover:border-blue-700 hover:bg-blue-700 hover:text-white'}`;
 	const whitespaceClassName = "text-gray-500 select-none";
 	const hoverWhitespaceClassName = "text-blue-700 select-none";
 	const tokenClassName = "text-blue-800";
 	const tokenHoverClassName = "text-white";
-	
+
 	const getWhitespaceeClass = hover => hover ? hoverWhitespaceClassName : whitespaceClassName;
 	const getTokenClass = hover => hover ? tokenHoverClassName : tokenClassName;
 
@@ -54,8 +59,22 @@ export default function Vim({ pushText, setInputText }) {
 					className={linkClassName}
 					href="#"
 					onMouseEnter={() => {
+						if (disabled) {
+							return;
+						}
+
 						setAboutHover(true);
-						typeAnimation(pushText, setInputText, 'about-me --help');
+						if (isAnimating) {
+							return;
+						}
+
+						const newLines = [
+							<>about-me --help</>,
+							<>A short bit if information about myself.</>,
+						];
+						setIsAnimating(true);
+						typeAnimation(setText, text, setInputText, newLines)
+							.then(() => setIsAnimating(false));
 					}}
 					onMouseLeave={() => setAboutHover(false)}
 				>
@@ -72,7 +91,25 @@ export default function Vim({ pushText, setInputText }) {
 				<a
 					className={linkClassName}
 					href="#"
-					onMouseEnter={() => setProjectsHover(true)}
+					onMouseEnter={() => {
+						if (disabled) {
+							return;
+						}
+
+						setProjectsHover(true);
+						if (isAnimating) {
+							return;
+						}
+
+						const newLines = [
+							<>show-projects --help</>,
+							<>Some of the projects I have <span className="text-green-800">collaborated</span> on.</>,
+							<>Most are on my <a className="text-blue-700 underline" href="https://github.com/shawn-mcginty">GitHub</a> profile.</>,
+						];
+						setIsAnimating(true);
+						typeAnimation(setText, text, setInputText, newLines)
+							.then(() => setIsAnimating(false));
+					}}
 					onMouseLeave={() => setProjectsHover(false)}
 				>
 					<span className={getWhitespaceeClass(isProjectsHover)}>&middot;&middot;&middot;&middot;</span>
@@ -86,7 +123,24 @@ export default function Vim({ pushText, setInputText }) {
 				<a
 					className={linkClassName}
 					href="#"
-					onMouseEnter={() => setThingsHover(true)}
+					onMouseEnter={() => {
+						if (disabled) {
+							return;
+						}
+
+						setThingsHover(true);
+						if (isAnimating) {
+							return;
+						}
+
+						const newLines = [
+							<>things-i-like --help</>,
+							<>Technologies that I love to work with.</>,
+						];
+						setIsAnimating(true);
+						typeAnimation(setText, text, setInputText, newLines)
+							.then(() => setIsAnimating(false));
+					}}
 					onMouseLeave={() => setThingsHover(false)}
 				>
 					<span className={getWhitespaceeClass(isThingsHover)}>&middot;&middot;&middot;&middot;</span>
@@ -104,7 +158,25 @@ export default function Vim({ pushText, setInputText }) {
 				<a
 					className={linkClassName}
 					href="#"
-					onMouseEnter={() => setContactHover(true)}
+					onMouseEnter={() => {
+						if (disabled) {
+							return;
+						}
+
+						setContactHover(true);
+						if (isAnimating) {
+							return;
+						}
+
+						const newLines = [
+							<>contact-me --help</>,
+							<>Some of my contact info is available here.</>,
+							<>Please feel free to DM me.</>,
+						];
+						setIsAnimating(true);
+						typeAnimation(setText, text, setInputText, newLines)
+							.then(() => setIsAnimating(false));
+					}}
 					onMouseLeave={() => setContactHover(false)}
 				>
 					<span className={getWhitespaceeClass(isContactHover)}>&middot;&middot;&middot;&middot;</span>
