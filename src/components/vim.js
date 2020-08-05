@@ -1,7 +1,39 @@
 import React, { useState } from 'react';
 
+const framesPerChar = 2;
+const enterDelay = 20;
 
-export default function Vim({ pushText }) {
+const typeAnimation = (pushText, setInputText, textToAnimate) => new Promise((resolve) => {
+	const animate = (pushLine, setInput, currentInputText, remainingInputText, framesToSkip) => {
+		if (framesToSkip > 0) {
+			window
+				.requestAnimationFrame(() => animate(pushLine, setInput, currentInputText, remainingInputText, framesToSkip - 1));
+			return;
+		}
+
+		if (remainingInputText.length > 0) {
+			const [ nextChar, ...restChars ] = remainingInputText;
+			const newInputText = `${currentInputText}${nextChar}`;
+			setInput(newInputText);
+
+			if (restChars.length > 0) {
+				window.requestAnimationFrame(() => animate(pushLine, setInput, newInputText, restChars, framesPerChar));
+				return;
+			}
+
+			window.requestAnimationFrame(() => animate(pushLine, setInput, newInputText, restChars, enterDelay));
+			return;
+		}
+
+		setInput('');
+		pushLine(currentInputText);
+		resolve();
+	};
+
+	animate(pushText, setInputText, '', textToAnimate, framesPerChar);
+});
+
+export default function Vim({ pushText, setInputText }) {
 	const [isAboutHover, setAboutHover] = useState(false);
 	const [isProjectsHover, setProjectsHover] = useState(false);
 	const [isThingsHover, setThingsHover] = useState(false);
@@ -23,7 +55,7 @@ export default function Vim({ pushText }) {
 					href="#"
 					onMouseEnter={() => {
 						setAboutHover(true);
-						pushText('about-me --help');
+						typeAnimation(pushText, setInputText, 'about-me --help');
 					}}
 					onMouseLeave={() => setAboutHover(false)}
 				>

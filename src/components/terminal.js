@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 
-export default function Terminal({ text }) {
+export default function Terminal({ text, inputText }) {
 	const terminalContainerEl = useRef(null);
 
 	useEffect(() => {
@@ -15,7 +15,9 @@ export default function Terminal({ text }) {
 				</pre>
 			</div>
 			<div className="input">
-				$
+				<span>$</span>
+				<span>{inputText}</span>
+				<span className="blinking">&nbsp;</span>
 			</div>
 		</div>
 	</div>
