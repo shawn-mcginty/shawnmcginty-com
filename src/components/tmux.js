@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 
 import Clock from './clock';
 import Terminal from './terminal';
 import Vim from './vim';
+import Display from './display';
 
 import DebugLvl from './logLevels/debugLvl';
 import WarnLvl from './logLevels/warnLvl';
@@ -19,12 +20,36 @@ const printLinesAndWait = (lines, text, setText, wait) => new Promise((resolve) 
 	});
 });
 
+const initialState = {
+	showDisplay: false,
+	display: null,
+};
+
+const reducer = (state, action) => {
+	switch (action.type) {
+		case 'show-display':
+			return {
+				...state,
+				showDisplay: true,
+				display: action.display,
+			};
+		case 'hide-display':
+			return {
+				...state,
+				showDisplay: false,
+				display: null,
+			};
+		default:
+			throw new Error();
+	}
+};
+
 export default function Tmux() {
 	const [text, setText] = useState([]);
 	const [inputText, setInputText] = useState('');
-	const [isAnimating, setIsAnimating] = useState(false);
 	const [isInitAnimationShown, setIsInitAnimationShown] = useState(false);
 	const [isInitDone, setIsInitDone] = useState(false);
+	const [state, dispatch] = useReducer(reducer, initialState)
 
 	useEffect(() => {
 		if (isInitAnimationShown) {
@@ -32,7 +57,7 @@ export default function Tmux() {
 		}
 
 		setIsInitAnimationShown(true);
-		printLinesAndWait([<>Last login: Whoops, maybe I should keep track of that</>], text, setText, stdWait/2)
+		printLinesAndWait([<>Last login: Whoops! Maybe I should keep track of that.</>], text, setText, stdWait/2)
 			.then(newText => printLinesAndWait([<>
 				<span className="text-green-700 font-semibold">user</span>
 				@
@@ -50,7 +75,7 @@ export default function Tmux() {
 				<WarnLvl/>Don't worry it's totally safe...
 			</>], newText, setText, stdWait*3))
 			.then(newText => printLinesAndWait([<>
-				<WarnLvl/>Some (most) downloads have failed. These packages were loaded from cahce. Which is probably fine.
+				<WarnLvl/>Some (most) downloads have failed. These packages were loaded from cache. Which is probably fine.
 			</>], newText, setText, stdWait))
 			.then(newText => printLinesAndWait([<>
 				<DebugLvl/>Reticulating splines...
@@ -80,7 +105,7 @@ export default function Tmux() {
 				<InfoLvl/>🎉🎉 Fake Initialization has finished! 🎉🎉
 			</>], newText, setText, 1))
 			.then(() => setIsInitDone(true));
-	});
+	}, [isInitAnimationShown, text]);
 
 	return <div className="flex flex-1 flex-col h-full max-h-full min-h-0">
 		<div className="flex mb-1 mt-1 mr-1 ml-1 flex-1 min-h-0">
@@ -89,13 +114,25 @@ export default function Tmux() {
 					setText={setText}
 					text={text}
 					setInputText={setInputText}
-					isAnimating={isAnimating}
-					setIsAnimating={setIsAnimating}
 					disabled={!isInitDone}
+					tmuxState={state}
+					tmuxDispatch={dispatch}
 				/>
 			</div>
 			<div className="flex-1 h-full max-h-full min-h-0 pl-2">
-				<Terminal text={text} inputText={inputText} disabled={!isInitDone}/>
+				<div className="max-h-full min-h-0 h-full">
+					{state.showDisplay === true &&
+						<div className="min-h-0" style={{ borderBottom: '1px dashed #718096', height: '80%', maxHeight: '80%' }}>
+							<Display tmuxState={state} tmuxDispatch={dispatch} />
+						</div>
+					}
+					<div className="min-h-0" style={{
+						height: state.showDisplay ? '20%' : '100%',
+						maxHeight: state.showDisplay ? '20%' : '100%',
+					}}>
+						<Terminal text={text} inputText={inputText} disabled={!isInitDone}/>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div className="flex bg-green-500 ml-1 mr-1 mb-1 font-mono text-gray-800">

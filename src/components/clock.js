@@ -48,6 +48,8 @@ const monthStr = mon => {
 			return 'Nov';
 		case 12:
 			return 'Dec';
+		default:
+			return 'Jan';
 	}
 }
 

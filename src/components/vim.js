@@ -1,171 +1,206 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useReducer } from 'react';
 
-import BashSymbol from './bashSymbol';
+import TypeAnimator from '../assets/typeAnimator';
+import displays from '../assets/displayEnum';
 
-const framesPerChar = 2;
-const enterDelay = 40;
+const typeAnimation = (setText, text, setInputText, newLines) => {
+	const animator = TypeAnimator.getAnimator();
+	return animator.cancelAndAnimate(setText, text, setInputText, newLines)
+		.catch(() => {}); // swallow this error
+};
 
-const typeAnimation = (setText, text, setInputText, newLines) => new Promise((resolve) => {
-	const animate = (setInput, currentInputText, remainingInputText, framesToSkip) => {
-		if (framesToSkip > 0) {
-			window
-				.requestAnimationFrame(() => animate(setInput, currentInputText, remainingInputText, framesToSkip - 1));
-			return;
-		}
+const toggleDisplay = (display, setText, text, setInputText, tmuxState, tmuxDispatch, newLines) => {
+	if (tmuxState.display === display) {
+		tmuxDispatch({ type: 'hide-display' });
+		return;
+	}
 
-		if (remainingInputText.length > 0) {
-			const [ nextChar, ...restChars ] = remainingInputText;
-			const newInputText = `${currentInputText}${nextChar}`;
-			setInput(newInputText);
+	typeAnimation(setText, text, setInputText, newLines)
+		.then(() => {
+			tmuxDispatch({ type: 'show-display', display });
+		});
+};
 
-			if (restChars.length > 0) {
-				window.requestAnimationFrame(() => animate(setInput, newInputText, restChars, framesPerChar));
-				return;
-			}
+const thirdWindowActive = state =>
+	state.aboutMeActive || state.thingsActive || state.contactMe;
 
-			window.requestAnimationFrame(() => animate(setInput, newInputText, restChars, enterDelay));
-			return;
-		}
+const initialState = {
+	aboutMeActive: false,
+	tingsActive: false,
+	contactMe: false,
+};
 
-		setInput('');
-		
-		const [ cmd, ...restOfLines ] = newLines;
-		const newSetOflines = [<><BashSymbol/>{cmd}</>, ...restOfLines];
-		setText([...text, ...newSetOflines]);
-		resolve();
+const reducer = (state, action) => {
+	const def = {
+		...initialState,
+		aboutMeActive: false,
+		tingsActive: false,
+		contactMe: false,
 	};
 
-	animate(setInputText, '', newLines[0].props.children, framesPerChar);
-});
+	switch(action.type) {
+		case 'about-me':
+			return {
+				...def,
+				aboutMeActive: !state.aboutMeActive,
+			};
+		case 'things':
+			return {
+				...def,
+				thingsActive: !state.things,
+			};
+		case 'contact-me':
+			return {
+				...def,
+				contactMe: !state.contactMe,
+			};
+		default:
+			throw new Error();
+	}
+};
 
-export default function Vim({ setText, text, setInputText, isAnimating, setIsAnimating, disabled }) {
+export default function Vim({ setText, text, setInputText, disabled, tmuxState, tmuxDispatch }) {
 	const [isAboutHover, setAboutHover] = useState(false);
-	const [isProjectsHover, setProjectsHover] = useState(false);
 	const [isThingsHover, setThingsHover] = useState(false);
 	const [isContactHover, setContactHover] = useState(false);
+	const [state, dispatch] = useReducer(reducer, initialState);
 	const linkClassName = `inline-block py-2 px-4 text-blue-700${disabled ? ' cursor-not-allowed' : ' hover:border hover:border-blue-700 hover:bg-blue-700 hover:text-white'}`;
-	const whitespaceClassName = "text-gray-500 select-none";
-	const hoverWhitespaceClassName = "text-blue-700 select-none";
-	const tokenClassName = "text-blue-800";
-	const tokenHoverClassName = "text-white";
+	const activeLinkClassName = 'inline-block py-2 px-4 text-white bg-blue-600 border-blue-600 hover:border-blue-700 hover:bg-blue-700';
+	const whitespaceClassName = 'text-gray-500 select-none';
+	const hoverWhitespaceClassName = `${disabled ? 'text-gray-500' : 'text-blue-700'} select-none`;
+	const tokenClassName = 'text-blue-800';
+	const tokenHoverClassName = disabled ? 'text-blue-800' : 'text-white';
+	const activeTokenClassName = 'text-white';
+	const activeWhitespaceClassName = 'text-blue-600';
 
-	const getWhitespaceeClass = hover => hover ? hoverWhitespaceClassName : whitespaceClassName;
-	const getTokenClass = hover => hover ? tokenHoverClassName : tokenClassName;
+	const isAboutMeActive = tmuxState.display === displays.aboutMe;
+	const isThingsActive = tmuxState.display === displays.things;
+	const isContactMeActive = tmuxState.display === displays.contact;
+
+	const getWhitespaceeClass = (hover, active = false) => {
+		if (hover) {
+			return hoverWhitespaceClassName;
+		}
+
+		if (active) {
+			return activeWhitespaceClassName;
+		}
+
+		return whitespaceClassName;
+	};
+	const getTokenClass = (hover, active = false) => {
+		if (hover) {
+			return tokenHoverClassName;
+		}
+
+		if (active) {
+			return activeTokenClassName;
+		}
+
+		return tokenClassName;
+	};
 
 	return <div className="h-full max-h-full">
 		<ul className="flex flex-col font-mono text-lg">
 			<li className="mr-10">
-				<a
-					className={linkClassName}
-					href="#"
+				<button
+					className={ isAboutMeActive ? activeLinkClassName :  linkClassName }
 					onMouseEnter={() => {
+						setAboutHover(true);
 						if (disabled) {
 							return;
 						}
 
-						setAboutHover(true);
-						if (isAnimating) {
-							return;
+						if (isAboutMeActive) {
+							return
 						}
 
 						const newLines = [
 							<>about-me --help</>,
 							<>A short bit if information about myself.</>,
 						];
-						setIsAnimating(true);
-						typeAnimation(setText, text, setInputText, newLines)
-							.then(() => setIsAnimating(false));
+						typeAnimation(setText, text, setInputText, newLines);
 					}}
-					onMouseLeave={() => setAboutHover(false)}
-				>
-					<span className={getWhitespaceeClass(isAboutHover)}>&middot;&middot;&middot;&middot;</span>
-					<span className={getTokenClass(isAboutHover)}>##</span>
-					<span className={getWhitespaceeClass(isAboutHover)}>&middot;</span>
-					About
-					<span className={getWhitespaceeClass(isAboutHover)}>&middot;</span>
-					Me
-					<span className={getWhitespaceeClass(isAboutHover)}>$</span>
-				</a>
-			</li>
-			<li className="mr-10">
-				<a
-					className={linkClassName}
-					href="#"
-					onMouseEnter={() => {
-						if (disabled) {
-							return;
-						}
-
-						setProjectsHover(true);
-						if (isAnimating) {
-							return;
-						}
-
+					onMouseLeave={(e) => {
+						e.target.blur();
+						setAboutHover(false);
+					}}
+					onClick={(e) => {
+						e.target.blur();
+						dispatch({ type: 'about-me' });
 						const newLines = [
-							<>show-projects --help</>,
-							<>Some of the projects I have <span className="text-green-800">collaborated</span> on.</>,
-							<>Most are on my <a className="text-blue-700 underline" href="https://github.com/shawn-mcginty">GitHub</a> profile.</>,
+							<>about-me</>,
+							<>Displaying "About Me" in another pane...</>
 						];
-						setIsAnimating(true);
-						typeAnimation(setText, text, setInputText, newLines)
-							.then(() => setIsAnimating(false));
+						toggleDisplay(displays.aboutMe, setText, text, setInputText, tmuxState, tmuxDispatch, newLines);
 					}}
-					onMouseLeave={() => setProjectsHover(false)}
 				>
-					<span className={getWhitespaceeClass(isProjectsHover)}>&middot;&middot;&middot;&middot;</span>
-					<span className={getTokenClass(isProjectsHover)}>##</span>
-					<span className={getWhitespaceeClass(isProjectsHover)}>&middot;</span>
-					Projects
-					<span className={getWhitespaceeClass(isProjectsHover)}>$</span>
-				</a>
+					<span className={getWhitespaceeClass(isAboutHover, isAboutMeActive)}>&middot;&middot;&middot;&middot;</span>
+					<span className={getTokenClass(isAboutHover, isAboutMeActive)}>##</span>
+					<span className={getWhitespaceeClass(isAboutHover, isAboutMeActive)}>&middot;</span>
+					About
+					<span className={getWhitespaceeClass(isAboutHover, isAboutMeActive)}>&middot;</span>
+					Me
+					<span className={getWhitespaceeClass(isAboutHover, isAboutMeActive)}>$</span>
+				</button>
 			</li>
 			<li className="mr-10">
-				<a
-					className={linkClassName}
-					href="#"
+				<button
+					className={ isThingsActive ? activeLinkClassName : linkClassName }
 					onMouseEnter={() => {
 						if (disabled) {
 							return;
 						}
 
 						setThingsHover(true);
-						if (isAnimating) {
-							return;
+
+						if (isThingsActive) {
+							return
 						}
 
 						const newLines = [
 							<>things-i-like --help</>,
 							<>Technologies that I love to work with.</>,
 						];
-						setIsAnimating(true);
-						typeAnimation(setText, text, setInputText, newLines)
-							.then(() => setIsAnimating(false));
+						typeAnimation(setText, text, setInputText, newLines);
 					}}
-					onMouseLeave={() => setThingsHover(false)}
+					onMouseLeave={(e) => {
+						e.target.blur();
+						setThingsHover(false);
+					}}
+					onClick={(e) => {
+						e.target.blur();
+						dispatch({ type: 'things' });
+						const newLines = [
+							<>things-i-like</>,
+							<>Displaying "Things I Like" in another pane...</>
+						];
+						toggleDisplay(displays.things, setText, text, setInputText, tmuxState, tmuxDispatch, newLines);
+					}}
 				>
-					<span className={getWhitespaceeClass(isThingsHover)}>&middot;&middot;&middot;&middot;</span>
-					<span className={getTokenClass(isThingsHover)}>##</span>
-					<span className={getWhitespaceeClass(isThingsHover)}>&middot;</span>
+					<span className={getWhitespaceeClass(isThingsHover, isThingsActive)}>&middot;&middot;&middot;&middot;</span>
+					<span className={getTokenClass(isThingsHover, isThingsActive)}>##</span>
+					<span className={getWhitespaceeClass(isThingsHover, isThingsActive)}>&middot;</span>
 					Things
-					<span className={getWhitespaceeClass(isThingsHover)}>&middot;</span>
+					<span className={getWhitespaceeClass(isThingsHover, isThingsActive)}>&middot;</span>
 					I
-					<span className={getWhitespaceeClass(isThingsHover)}>&middot;</span>
+					<span className={getWhitespaceeClass(isThingsHover, isThingsActive)}>&middot;</span>
 					Like
-					<span className={getWhitespaceeClass(isThingsHover)}>$</span>
-				</a>
+					<span className={getWhitespaceeClass(isThingsHover, isThingsActive)}>$</span>
+				</button>
 			</li>
 			<li className="mr-10">
-				<a
-					className={linkClassName}
-					href="#"
+				<button
+					className={ isContactMeActive ? activeLinkClassName : linkClassName }
 					onMouseEnter={() => {
 						if (disabled) {
 							return;
 						}
 
 						setContactHover(true);
-						if (isAnimating) {
-							return;
+
+						if (isContactMeActive) {
+							return
 						}
 
 						const newLines = [
@@ -173,20 +208,30 @@ export default function Vim({ setText, text, setInputText, isAnimating, setIsAni
 							<>Some of my contact info is available here.</>,
 							<>Please feel free to DM me.</>,
 						];
-						setIsAnimating(true);
-						typeAnimation(setText, text, setInputText, newLines)
-							.then(() => setIsAnimating(false));
+						typeAnimation(setText, text, setInputText, newLines);
 					}}
-					onMouseLeave={() => setContactHover(false)}
+					onMouseLeave={(e) => {
+						e.target.blur();
+						setContactHover(false);
+					}}
+					onClick={(e) => {
+						e.target.blur();
+						dispatch({ type: 'contact-me' });
+						const newLines = [
+							<>contact-me</>,
+							<>Displaying "Contact Me" in another pane...</>
+						];
+						toggleDisplay(displays.contact, setText, text, setInputText, tmuxState, tmuxDispatch, newLines);
+					}}
 				>
-					<span className={getWhitespaceeClass(isContactHover)}>&middot;&middot;&middot;&middot;</span>
-					<span className={getTokenClass(isContactHover)}>##</span>
-					<span className={getWhitespaceeClass(isContactHover)}>&middot;</span>
+					<span className={getWhitespaceeClass(isContactHover, isContactMeActive)}>&middot;&middot;&middot;&middot;</span>
+					<span className={getTokenClass(isContactHover, isContactMeActive)}>##</span>
+					<span className={getWhitespaceeClass(isContactHover, isContactMeActive)}>&middot;</span>
 					Contact
-					<span className={getWhitespaceeClass(isContactHover)}>&middot;</span>
+					<span className={getWhitespaceeClass(isContactHover, isContactMeActive)}>&middot;</span>
 					Me
-					<span className={getWhitespaceeClass(isContactHover)}>$</span>
-				</a>
+					<span className={getWhitespaceeClass(isContactHover, isContactMeActive)}>$</span>
+				</button>
 			</li>
 		</ul>
 		<span className={whitespaceClassName}>EOF</span>

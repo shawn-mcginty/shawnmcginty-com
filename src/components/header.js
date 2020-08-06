@@ -8,7 +8,7 @@ export default function Header() {
 				SHAWN McGINTY
 			</p>
 			<p className="font-mono font-light text-gray-300 mb-1" style={{ marginTop: '-14px'}}>
-				// Full-stack Software Creator
+				&#47;&#47; Full-stack Software Creator
 			</p>
 		</div>
 		<div className="mr-2 mb-2 ml-2">
@@ -20,9 +20,9 @@ export default function Header() {
 				<RiTwitterLine className="mr-1 inline" />
 				Twitter
 			</a>
-			<a href="#" className="inline-block px-4 py-2 text-white">
+			<button className="inline-block px-4 py-2 text-white">
 				<RiMenuLine/>
-			</a>
+			</button>
 		</div>
 	</nav>
 };
