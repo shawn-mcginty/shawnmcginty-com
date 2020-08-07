@@ -44,7 +44,7 @@ const reducer = (state, action) => {
 	}
 };
 
-export default function Tmux() {
+export default function Tmux({ originalDisplay }) {
 	const [text, setText] = useState([]);
 	const [inputText, setInputText] = useState('');
 	const [isInitAnimationShown, setIsInitAnimationShown] = useState(false);
@@ -52,6 +52,13 @@ export default function Tmux() {
 	const [state, dispatch] = useReducer(reducer, initialState)
 
 	useEffect(() => {
+		if (originalDisplay) {
+			dispatch({
+				type: 'show-display',
+				display: originalDisplay,
+			});
+		}
+
 		if (isInitAnimationShown) {
 			return;
 		}
@@ -105,7 +112,7 @@ export default function Tmux() {
 				<InfoLvl/>🎉🎉 Fake Initialization has finished! 🎉🎉
 			</>], newText, setText, 1))
 			.then(() => setIsInitDone(true));
-	}, [isInitAnimationShown, text]);
+	}, [isInitAnimationShown, text, originalDisplay]);
 
 	return <div className="flex flex-1 flex-col h-full max-h-full min-h-0">
 		<div className="flex mb-1 mt-1 mr-1 ml-1 flex-1 min-h-0">
@@ -137,7 +144,7 @@ export default function Tmux() {
 		</div>
 		<div className="flex bg-green-500 ml-1 mr-1 mb-1 font-mono text-gray-800">
 			<div className="w-1/2 text-left ml-1">
-				[0] 0:zsh*
+				[0] 0:{state.display || 'zsh'}*
 			</div>
 			<div className="w-1/2 text-right mr-1">
 				<Clock/>

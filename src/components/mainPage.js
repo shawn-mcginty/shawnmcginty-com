@@ -6,7 +6,7 @@ import Tmux from './tmux';
 
 import './mainPage.css';
 
-export default function MainPage() {
+export default function MainPage({ display }) {
 	return <div className="flex flex-col h-screen max-h-screen min-h-0">
 		<Helmet>
 			<html lang="en" />
@@ -14,6 +14,6 @@ export default function MainPage() {
 			<title>Shawn McGinty - Full-stack Software Creator</title>
 		</Helmet>
 		<Header />
-		<Tmux />
+		<Tmux originalDisplay={display}/>
 	</div>
 };

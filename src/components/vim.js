@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState } from 'react';
 
 import TypeAnimator from '../assets/typeAnimator';
 import displays from '../assets/displayEnum';
@@ -21,49 +21,10 @@ const toggleDisplay = (display, setText, text, setInputText, tmuxState, tmuxDisp
 		});
 };
 
-const thirdWindowActive = state =>
-	state.aboutMeActive || state.thingsActive || state.contactMe;
-
-const initialState = {
-	aboutMeActive: false,
-	tingsActive: false,
-	contactMe: false,
-};
-
-const reducer = (state, action) => {
-	const def = {
-		...initialState,
-		aboutMeActive: false,
-		tingsActive: false,
-		contactMe: false,
-	};
-
-	switch(action.type) {
-		case 'about-me':
-			return {
-				...def,
-				aboutMeActive: !state.aboutMeActive,
-			};
-		case 'things':
-			return {
-				...def,
-				thingsActive: !state.things,
-			};
-		case 'contact-me':
-			return {
-				...def,
-				contactMe: !state.contactMe,
-			};
-		default:
-			throw new Error();
-	}
-};
-
 export default function Vim({ setText, text, setInputText, disabled, tmuxState, tmuxDispatch }) {
 	const [isAboutHover, setAboutHover] = useState(false);
 	const [isThingsHover, setThingsHover] = useState(false);
 	const [isContactHover, setContactHover] = useState(false);
-	const [state, dispatch] = useReducer(reducer, initialState);
 	const linkClassName = `inline-block py-2 px-4 text-blue-700${disabled ? ' cursor-not-allowed' : ' hover:border hover:border-blue-700 hover:bg-blue-700 hover:text-white'}`;
 	const activeLinkClassName = 'inline-block py-2 px-4 text-white bg-blue-600 border-blue-600 hover:border-blue-700 hover:bg-blue-700';
 	const whitespaceClassName = 'text-gray-500 select-none';
@@ -127,7 +88,6 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 					}}
 					onClick={(e) => {
 						e.target.blur();
-						dispatch({ type: 'about-me' });
 						const newLines = [
 							<>about-me</>,
 							<>Displaying "About Me" in another pane...</>
@@ -170,7 +130,6 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 					}}
 					onClick={(e) => {
 						e.target.blur();
-						dispatch({ type: 'things' });
 						const newLines = [
 							<>things-i-like</>,
 							<>Displaying "Things I Like" in another pane...</>
@@ -216,7 +175,6 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 					}}
 					onClick={(e) => {
 						e.target.blur();
-						dispatch({ type: 'contact-me' });
 						const newLines = [
 							<>contact-me</>,
 							<>Displaying "Contact Me" in another pane...</>
