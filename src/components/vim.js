@@ -25,8 +25,9 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 	const [isAboutHover, setAboutHover] = useState(false);
 	const [isThingsHover, setThingsHover] = useState(false);
 	const [isContactHover, setContactHover] = useState(false);
-	const linkClassName = `inline-block py-2 px-4 text-blue-700${disabled ? ' cursor-not-allowed' : ' hover:border hover:border-blue-700 hover:bg-blue-700 hover:text-white'}`;
-	const activeLinkClassName = 'inline-block py-2 px-4 text-white bg-blue-600 border-blue-600 hover:border-blue-700 hover:bg-blue-700';
+	const [isBlogHover, setBlogHover] = useState(false);
+	const linkClassName = `focus:outline-none inline-block py-2 px-4 text-blue-700${disabled ? ' cursor-not-allowed' : ' hover:border hover:border-blue-700 hover:bg-blue-700 hover:text-white'}`;
+	const activeLinkClassName = 'focus:outline-none inline-block py-2 px-4 text-white bg-blue-600 border-blue-600 hover:border-blue-700 hover:bg-blue-700';
 	const whitespaceClassName = 'text-gray-500 select-none';
 	const hoverWhitespaceClassName = `${disabled ? 'text-gray-500' : 'text-blue-700'} select-none`;
 	const tokenClassName = 'text-blue-800';
@@ -104,6 +105,35 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 					<span className={getWhitespaceeClass(isAboutHover, isAboutMeActive)}>$</span>
 				</button>
 			</li>
+			<li className="mr-10">
+				<a
+					href="https://medium.com/@shawn.mcginty"
+					className={ linkClassName }
+					onMouseEnter={() => {
+						setBlogHover(true);
+						if (disabled) {
+							return;
+						}
+
+						const newLines = [
+							<>blog --help</>,
+							<>Check out my profile at medium.com.</>,
+						];
+						typeAnimation(setText, text, setInputText, newLines);
+					}}
+					onMouseLeave={(e) => {
+						e.target.blur();
+						setBlogHover(false);
+					}}
+				>
+					<span className={getWhitespaceeClass(isBlogHover, false)}>&middot;&middot;&middot;&middot;</span>
+					<span className={getTokenClass(isBlogHover, false)}>##</span>
+					<span className={getWhitespaceeClass(isBlogHover, false)}>&middot;</span>
+					Blog
+					<span className={getWhitespaceeClass(isBlogHover, false)}>$</span>
+				</a>
+			</li>
+			
 			<li className="mr-10">
 				<button
 					className={ isThingsActive ? activeLinkClassName : linkClassName }
