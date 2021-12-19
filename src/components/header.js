@@ -35,7 +35,7 @@ export default function Header() {
 					<a href="/about-me" className="px-4 py-2 text-white hover:text-gray-400">
 						About Me
 					</a>
-					<a href="https://medium.com/@shawn.mcginty" className="px-4 py-2 text-white hover:text-gray-400">
+					<a href="https://blog.shawnmcginty.com" className="px-4 py-2 text-white hover:text-gray-400">
 						Blog
 					</a>
 					<a href="/things" className="px-4 py-2 text-white hover:text-gray-400">

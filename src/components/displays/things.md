@@ -7,13 +7,13 @@ Things I Like
 	* Automation (CI/CD)
 
 2. __Languages__
-	* JavaScript (front and back)
+	* JavaScript/TypeScript (front and back)
 		* NodeJS
 		* Vue
 		* React
-	* OCaml (also ReasonML)
+	* OCaml (also ReScript)
 	* Erlang (also Elixir anything BEAM related really)
-	* Scala
+	* C
 	* Go
 
 3. __RDBMS__
@@ -23,4 +23,5 @@ Things I Like
 4. __Other Technologies__
 	* Docker
 	* ElasticSearch
+	* GraphQL
 

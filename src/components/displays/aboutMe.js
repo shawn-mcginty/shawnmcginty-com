@@ -21,9 +21,9 @@ export default function AboutMe() {
 		I<Sp/>write<Sp/>code<Sp/>and<Sp/>solve<Sp/>problems.<Sp/>Working<Sp/>almost<Sp/>exclusively<Sp/>with<Sp/>web<Br/>
 		technologies,<Sp/>but<Sp/>I<Sp/>love<Sp/>interesting<Sp/>problems<Sp/>in<Sp/>any<Sp/>area<Sp/>of<Sp/>the<Sp/>software<Br/>
 		world.<Sp/>Currently<Sp/>a<Sp/>Senior<Sp/>Software<Sp/>Engineer<Sp/>
-		<a href="https://traclabs.com" className="underline text-blue-500">@traclabs</a>
+		<a href="https://udacity.com" className="underline text-blue-500">@udacity</a>
 		<Sp/>where<Sp/>our<Sp/>team<Br/>
-		provides<Sp/>mission<Sp/>critical<Sp/>software<Sp/>at<Sp/>a<Sp/>global<Sp/>scale.<Br/>
+		helps<Sp/>educate<Sp/>and<Sp/>upskill<Sp/>people<Sp/>all<Sp/>over<Sp/>the<Sp/>world.<Br/>
 		<Br/>
 		Thank<Sp/>you<Sp/>for<Sp/>taking<Sp/>the<Sp/>time<Sp/>to<Sp/>read<Sp/>my<Sp/>short<Sp/>bio.<Sp/>😃<Br/>
 		<EOF/>

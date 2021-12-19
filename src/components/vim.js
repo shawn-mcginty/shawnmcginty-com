@@ -107,7 +107,7 @@ export default function Vim({ setText, text, setInputText, disabled, tmuxState, 
 			</li>
 			<li className="mr-10">
 				<a
-					href="https://medium.com/@shawn.mcginty"
+					href="https://blog.shawnmcginty.com"
 					className={ linkClassName }
 					onMouseEnter={() => {
 						setBlogHover(true);

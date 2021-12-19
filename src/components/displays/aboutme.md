@@ -12,7 +12,7 @@ fighting games baby!)_, writing code, and skateboarding!
 #### What Do I Do?
 I write code and solve problems. Working almost exclusively with web
 technologies, but I love interesting problems in any area of the software
-world. Currently a Senior Software Engineer @traclabs where our team
-provides mission critical software at a global scale.
+world. Currently a Senior Software Engineer @udacity where our team helps to
+educate and upskill people all over the world.
 
 Thank you for taking the time to read my short bio. 😃
